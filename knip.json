@@ -1,0 +1,22 @@
+{
+	"entry": [
+		"eslint.config.ts",
+		"src/index.ts",
+		"src/react.ts",
+		"src/knip.ts",
+		"src/bin/eslint.ts",
+		"src/bin/knip.ts",
+		"src/bin/run-tool.ts",
+		"src/bin/sherif.ts",
+		"scripts/smoke-test.ts"
+	],
+	"project": [
+		"src/**/*.ts",
+		"scripts/**/*.ts",
+		"eslint.config.ts"
+	],
+	"ignoreDependencies": [
+		"jsonc-eslint-parser",
+		"sherif"
+	]
+}

@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"skipLibCheck": true,
+		"verbatimModuleSyntax": true,
+		"resolveJsonModule": true,
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"src/**/*.ts",
+		"scripts/**/*.ts"
+	],
+	"exclude": [
+		"dist",
+		"node_modules"
+	]
+}
