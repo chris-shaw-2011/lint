@@ -208,11 +208,20 @@ export default defineConfig(
 			"**/playwright-report/**",
 			"**/test-results/**",
 			"**/package-lock.json",
+			"**/bin/**",
 		],
 	},
 	eslint.configs.recommended,
 	...tseslint.configs.strictTypeChecked,
 	...tseslint.configs.stylisticTypeChecked,
+	tseslint.configs.recommendedTypeChecked,
+	{
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+			},
+		},
+	},
 	stylistic.configs.customize({
 		indent: "tab",
 		quotes: "double",
@@ -247,18 +256,6 @@ export default defineConfig(
 	},
 	{
 		files: ["**/*.{json,jsonc,json5}"],
-		rules: {
-			"jsonc/indent": ["error", 2],
-		},
-	},
-	{
-		files: ["**/package.json"],
-		rules: {
-			"jsonc/indent": ["error", "tab"],
-		},
-	},
-	{
-		files: ["**/knip.json", "**/tsconfig*.json"],
 		rules: {
 			"jsonc/indent": ["error", "tab"],
 		},

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process"
 import type { ExecFileSyncOptionsWithBufferEncoding } from "node:child_process"
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import process from "node:process"
@@ -52,6 +52,7 @@ try {
 		name: "lint-smoke-workspace",
 		private: true,
 		type: "module",
+		packageManager: "npm@11.6.2",
 		workspaces: ["packages/*"],
 		scripts: {
 			"lint": "npm run lint:root && npm run lint:workspaces",
@@ -75,6 +76,11 @@ try {
 		},
 		include: ["src/**/*.ts", "eslint.config.ts"],
 	})
+
+	writeFile(
+		path.join(fixtureRoot, "knip.config.ts"),
+		`import {\n\tcreateKnipConfig,\n\trootWorkspaceConfig,\n\tworkspaceConfig,\n} from "@chris-shaw-2011/lint/knip"\n\nexport default createKnipConfig({\n\tworkspaces: {\n\t\t".": rootWorkspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/ts-lib": workspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/react-app": workspaceConfig({\n\t\t\tentry: ["src/App.tsx"],\n\t\t}),\n\t},\n})\n`,
+	)
 
 	writeFile(
 		path.join(fixtureRoot, "eslint.config.ts"),
@@ -149,7 +155,7 @@ try {
 
 	writeFile(
 		path.join(fixtureRoot, "packages/react-app/src/App.tsx"),
-		`interface AppProps {\n\tlabel: string,\n}\n\nexport function App({ label }: AppProps): JSX.Element {\n\treturn <div>{label}</div>\n}\n`,
+		`import type { JSX } from "react"\n\ninterface AppProps {\n\tlabel: string,\n}\n\nexport function App({ label }: AppProps): JSX.Element {\n\treturn <div>{label}</div>\n}\n`,
 	)
 
 	const npmEnv = {
@@ -158,17 +164,25 @@ try {
 	}
 
 	run("npm", ["install"], { cwd: fixtureRoot, env: npmEnv })
+	const eslintBinPath = path.join(fixtureRoot, "node_modules/.bin/eslint")
+	const eslintBinMode = statSync(eslintBinPath).mode & 0o111
+	if (eslintBinMode === 0) {
+		throw new Error(`Installed eslint shim is not executable: ${eslintBinPath}`)
+	}
 	run("npm", ["run", "lint:root"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:workspaces"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint", "-w", "@smoke/ts-lib"], { cwd: fixtureRoot, env: npmEnv })
-	run("npm", ["run", "knip", "--", "--version"], { cwd: fixtureRoot, env: npmEnv })
-	run("npm", ["run", "sherif", "--", "--help"], { cwd: fixtureRoot, env: npmEnv })
+	run("npm", ["run", "knip", "--", "--config", "knip.config.ts", "--reporter", "compact"], {
+		cwd: fixtureRoot,
+		env: npmEnv,
+	})
+	run("npm", ["run", "sherif", "--", "."], { cwd: fixtureRoot, env: npmEnv })
 	run(
 		"node",
 		[
 			"--input-type=module",
 			"-e",
-			"import preset from '@chris-shaw-2011/lint/knip'; if (!preset || typeof preset !== 'object') { throw new Error('Invalid knip export') }",
+			"import { createKnipConfig, rootWorkspaceConfig, workspaceConfig } from '@chris-shaw-2011/lint/knip'; const config = createKnipConfig({ workspaces: { '.': rootWorkspaceConfig(), 'packages/*': workspaceConfig() } }); if (!Array.isArray(config.entry) || !config.entry.includes('**/eslint.config.{js,mjs,cjs,ts,mts,cts}') || !config.entry.includes('**/knip.config.{js,mjs,cjs,ts,mts,cts}')) { throw new Error('Missing shared knip entry patterns') }",
 		],
 		{ cwd: fixtureRoot },
 	)

@@ -1,9 +1,9 @@
-name: Publish
+name: Publish Package
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -12,28 +12,40 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
           registry-url: https://npm.pkg.github.com
           scope: "@chris-shaw-2011"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Quality checks
-        run: npm run check
+      - name: Check whether version is already published
+        id: publish_check
+        run: |
+          VERSION=$(npm pkg get version | tr -d '"')
+          if npm view "@chris-shaw-2011/lint@${VERSION}" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} is already published. Skipping publish."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} has not been published yet."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build
-        run: npm run build
-
-      - name: Smoke test
-        run: npm run test:smoke
+      - name: Verify package
+        if: steps.publish_check.outputs.published == 'false'
+        run: npm run verify
 
       - name: Publish package
+        if: steps.publish_check.outputs.published == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
