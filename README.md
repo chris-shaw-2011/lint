@@ -10,6 +10,7 @@ Create or update `.npmrc` in the consuming repository:
 
 ```ini
 @chris-shaw-2011:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
 `GITHUB_TOKEN` can be a classic PAT (`read:packages`) for installs and `write:packages` for publishing.

@@ -41,7 +41,7 @@ export function createKnipConfig(
 	return {
 		...config,
 		entry: unique([...baseConfig.entry, ...arrayify(config.entry)]),
-	} as KnipConfigObject
+	}
 }
 
 export function workspaceConfig(

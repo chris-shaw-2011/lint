@@ -190,12 +190,12 @@ function disableRulesWithPrefix(
 }
 
 const markdownDisabledJsoncRules = disableRulesWithPrefix(
-	jsonc.configs["flat/recommended-with-json"] as { rules?: Record<string, unknown> }[],
+	jsonc.configs["flat/recommended-with-json"],
 	"jsonc/",
 )
 
 const markdownDisabledYmlRules = disableRulesWithPrefix(
-	yml.configs["flat/recommended"] as { rules?: Record<string, unknown> }[],
+	yml.configs["flat/recommended"],
 	"yml/",
 )
 
@@ -242,18 +242,15 @@ export default defineConfig(
 	},
 	...jsonc.configs["flat/recommended-with-json"],
 	...yml.configs["flat/recommended"],
-	{
-		files: ["**/*.md"],
-		plugins: {
-			markdown,
-		},
-		extends: ["markdown/recommended"],
+	...markdown.configs.recommended.map(config => ({
+		...config,
 		rules: {
+			...config.rules,
 			...markdownDisabledCoreRules,
 			...markdownDisabledJsoncRules,
 			...markdownDisabledYmlRules,
 		},
-	},
+	})),
 	{
 		files: ["**/*.{json,jsonc,json5}"],
 		rules: {

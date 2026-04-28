@@ -1,0 +1,55 @@
+{
+	"js/ts.tsdk.path": "./node_modules/typescript/lib",
+	"js/ts.validate.enabled": true,
+	"editor.detectIndentation": false,
+	"editor.tabSize": 3,
+	"editor.insertSpaces": false,
+	"files.insertFinalNewline": true,
+	"files.trimFinalNewlines": false,
+	"editor.formatOnSave": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit"
+	},
+	"eslint.runtime": "/usr/bin/node",
+	"eslint.nodePath": "../lint/node_modules",
+	"eslint.workingDirectories": [
+		{
+			"mode": "auto",
+			"directory": ".",
+			"changeProcessCWD": true
+		}
+	],
+	"eslint.validate": [
+		"json",
+		"jsonc",
+		"json5",
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact"
+	],
+	"eslint.probe": [
+		"json",
+		"jsonc",
+		"json5",
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact"
+	],
+	"[json]": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		}
+	},
+	"[jsonc]": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		}
+	},
+	"[json5]": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		}
+	}
+}
