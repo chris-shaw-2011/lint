@@ -1,13 +1,21 @@
+import { defineConfig } from "eslint/config"
 import baseConfig from "./index.js"
 import globals from "globals"
 import reactPlugin from "eslint-plugin-react"
 import reactHooks from "eslint-plugin-react-hooks"
 import reactRefresh from "eslint-plugin-react-refresh"
 
-export default [
+const reactFiles = ["**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"]
+
+export default defineConfig(
 	...baseConfig,
-	reactHooks.configs.flat["recommended-latest"],
-	reactRefresh.configs.recommended,
+	{
+		files: reactFiles,
+		extends: [
+			reactHooks.configs.flat["recommended-latest"],
+			reactRefresh.configs.recommended,
+		],
+	},
 	{
 		files: ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"],
 		...reactPlugin.configs.flat.recommended,
@@ -25,4 +33,4 @@ export default [
 			},
 		},
 	},
-]
+)

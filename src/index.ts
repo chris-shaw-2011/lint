@@ -165,39 +165,16 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 	},
 }
 
-const markdownDisabledCoreRules = Object.fromEntries(
-	Object.keys(eslint.configs.recommended.rules).map(ruleName => [ruleName, "off"] as const),
-)
-
-function disableRulesWithPrefix(
-	configs: { rules?: Record<string, unknown> }[],
-	prefix: string,
-): Record<string, "off"> {
-	const disabledRules = new Set<string>()
-
-	for (const config of configs) {
-		if (!config.rules) {
-			continue
-		}
-		for (const ruleName of Object.keys(config.rules)) {
-			if (ruleName.startsWith(prefix)) {
-				disabledRules.add(ruleName)
-			}
-		}
-	}
-
-	return Object.fromEntries(Array.from(disabledRules, ruleName => [ruleName, "off"] as const))
-}
-
-const markdownDisabledJsoncRules = disableRulesWithPrefix(
-	jsonc.configs["flat/recommended-with-json"],
-	"jsonc/",
-)
-
-const markdownDisabledYmlRules = disableRulesWithPrefix(
-	yml.configs["flat/recommended"],
-	"yml/",
-)
+const jsTsFiles = ["**/*.{js,mjs,cjs,jsx,mjsx,ts,mts,cts,tsx,mtsx}"]
+const tsFiles = ["**/*.{ts,tsx,mts,cts}"]
+const jsonFiles = ["*.{json,jsonc,json5}", "**/*.{json,jsonc,json5}"]
+const yamlFiles = ["*.{yml,yaml}", "**/*.{yml,yaml}"]
+const markdownFiles = ["*.md", "**/*.md"]
+const typeUncheckedConfigFiles = [
+	"**/eslint.config.{js,mjs,cjs,ts,mts,cts}",
+	"**/*.config.{js,mjs,cjs,ts,mts,cts}",
+	"**/playwright*.{js,mjs,cjs,ts,mts,cts}",
+]
 
 export default defineConfig(
 	{
@@ -211,67 +188,25 @@ export default defineConfig(
 			"**/bin/**",
 		],
 	},
-	eslint.configs.recommended,
-	...tseslint.configs.strictTypeChecked,
-	...tseslint.configs.stylisticTypeChecked,
-	tseslint.configs.recommendedTypeChecked,
 	{
-		languageOptions: {
-			parserOptions: {
-				projectService: true,
-			},
-		},
-	},
-	stylistic.configs.customize({
-		indent: "tab",
-		quotes: "double",
-		semi: false,
-		jsx: true,
-	}),
-	{
-		files: ["**/*.{json,jsonc,json5}"],
-		...tseslint.configs.disableTypeChecked,
+		files: jsTsFiles,
+		extends: [
+			eslint.configs.recommended,
+			stylistic.configs.customize({
+				indent: "tab",
+				quotes: "double",
+				semi: false,
+				jsx: true,
+			}),
+		],
 	},
 	{
-		files: ["**/*.{yml,yaml}"],
-		...tseslint.configs.disableTypeChecked,
-	},
-	{
-		files: ["**/*.md"],
-		...tseslint.configs.disableTypeChecked,
-	},
-	...jsonc.configs["flat/recommended-with-json"],
-	...yml.configs["flat/recommended"],
-	...markdown.configs.recommended.map(config => ({
-		...config,
-		rules: {
-			...config.rules,
-			...markdownDisabledCoreRules,
-			...markdownDisabledJsoncRules,
-			...markdownDisabledYmlRules,
-		},
-	})),
-	{
-		files: ["**/*.{json,jsonc,json5}"],
-		rules: {
-			"jsonc/indent": ["error", "tab"],
-		},
-	},
-	{
-		files: ["**/*.{js,mjs,cjs,jsx,mjsx,ts,mts,cts,tsx,mtsx}"],
-		plugins: {
-			internal: {
-				rules: {
-					"no-redundant-object-remap": noRedundantObjectRemapRule,
-				},
-			},
-		},
-		rules: {
-			"internal/no-redundant-object-remap": "error",
-		},
-	},
-	{
-		files: ["**/*.{ts,tsx,mts,cts}"],
+		files: tsFiles,
+		extends: [
+			...tseslint.configs.strictTypeChecked,
+			...tseslint.configs.stylisticTypeChecked,
+			tseslint.configs.recommendedTypeChecked,
+		],
 		languageOptions: {
 			parserOptions: {
 				projectService: true,
@@ -332,11 +267,35 @@ export default defineConfig(
 		},
 	},
 	{
-		files: [
-			"**/eslint.config.{js,mjs,cjs,ts,mts,cts}",
-			"**/*.config.{js,mjs,cjs,ts,mts,cts}",
-			"**/playwright*.{js,mjs,cjs,ts,mts,cts}",
-		],
-		...tseslint.configs.disableTypeChecked,
+		files: jsonFiles,
+		extends: [jsonc.configs["flat/recommended-with-json"]],
+		rules: {
+			"jsonc/indent": ["error", "tab"],
+		},
+	},
+	{
+		files: yamlFiles,
+		extends: [yml.configs["flat/standard"]],
+	},
+	{
+		files: markdownFiles,
+		extends: [markdown.configs.recommended],
+	},
+	{
+		files: jsTsFiles,
+		plugins: {
+			internal: {
+				rules: {
+					"no-redundant-object-remap": noRedundantObjectRemapRule,
+				},
+			},
+		},
+		rules: {
+			"internal/no-redundant-object-remap": "error",
+		},
+	},
+	{
+		files: typeUncheckedConfigFiles,
+		extends: [tseslint.configs.disableTypeChecked],
 	},
 )
