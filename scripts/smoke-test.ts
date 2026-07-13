@@ -63,6 +63,7 @@ try {
 		},
 		devDependencies: {
 			"@chris-shaw-2011/lint": `file:${tarballPath}`,
+			"typescript": "^7.0.2",
 		},
 	})
 
@@ -164,6 +165,15 @@ try {
 	}
 
 	run("npm", ["install"], { cwd: fixtureRoot, env: npmEnv })
+	run(
+		"node",
+		[
+			"--input-type=module",
+			"-e",
+			`import { createRequire } from "node:module"; const projectRequire = createRequire(import.meta.url); const lintRequire = createRequire(projectRequire.resolve("@chris-shaw-2011/lint")); if (!projectRequire("typescript").version.startsWith("7.")) { throw new Error("Smoke fixture did not install TypeScript 7.") } if (lintRequire("typescript").version !== "6.0.3") { throw new Error("Lint package did not resolve its bundled TypeScript 6 runtime.") } if (!lintRequire.resolve("ts-api-utils").includes("@chris-shaw-2011/lint/node_modules")) { throw new Error("Lint package did not resolve its bundled ts-api-utils runtime.") }`,
+		],
+		{ cwd: fixtureRoot },
+	)
 	const eslintBinPath = path.join(fixtureRoot, "node_modules/.bin/eslint")
 	const eslintBinMode = statSync(eslintBinPath).mode & 0o111
 	if (eslintBinMode === 0) {

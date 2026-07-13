@@ -17,5 +17,6 @@ export default createKnipConfig({
 	],
 	ignoreDependencies: [
 		"jsonc-eslint-parser",
+		"ts-api-utils",
 	],
 })

@@ -23,6 +23,10 @@ npm install -D @chris-shaw-2011/lint
 
 This installs ESLint + plugins + `knip` + `sherif` as part of the package dependency graph.
 
+The package bundles TypeScript 6 and its `ts-api-utils` runtime for `typescript-eslint`.
+Consuming projects can install TypeScript 7 separately: their compiler uses TypeScript 7,
+while this package's linting stack continues to use TypeScript 6.
+
 ## ESLint Usage
 
 ### TypeScript config

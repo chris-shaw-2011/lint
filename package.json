@@ -1,6 +1,6 @@
 {
 	"name": "@chris-shaw-2011/lint",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Shared lint configuration and tooling for TypeScript and React workspaces.",
 	"license": "MIT",
 	"type": "module",
@@ -77,9 +77,14 @@
 		"jsonc-eslint-parser": "^3.1.0",
 		"knip": "^6.26.0",
 		"sherif": "^1.13.0",
+		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.63.0"
 	},
+	"bundledDependencies": [
+		"ts-api-utils",
+		"typescript"
+	],
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
 		"@types/node": "^26.1.1",
