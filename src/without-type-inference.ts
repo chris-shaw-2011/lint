@@ -19,7 +19,7 @@ function isAstNode(value: unknown): value is AstNode {
 	return "type" in value && typeof (value as { type?: unknown }).type === "string"
 }
 
-function getAstProperty(value: unknown, key: string): unknown {
+function getAstProperty(value: unknown, key: string) {
 	if (typeof value !== "object" || value === null) {
 		return undefined
 	}
@@ -29,11 +29,11 @@ function getAstProperty(value: unknown, key: string): unknown {
 	return (value as Record<string, unknown>)[key]
 }
 
-function isTruthyBooleanProperty(value: unknown, key: string): boolean {
+function isTruthyBooleanProperty(value: unknown, key: string) {
 	return getAstProperty(value, key) === true
 }
 
-function getIdentifierName(node: unknown): string | null {
+function getIdentifierName(node: unknown) {
 	if (!isAstNode(node) || node.type !== "Identifier") {
 		return null
 	}
@@ -41,7 +41,7 @@ function getIdentifierName(node: unknown): string | null {
 	return typeof name === "string" ? name : null
 }
 
-function getStaticPropertyName(node: unknown): string | null {
+function getStaticPropertyName(node: unknown) {
 	if (!isAstNode(node)) {
 		return null
 	}
@@ -63,7 +63,7 @@ function getStaticPropertyName(node: unknown): string | null {
 	return null
 }
 
-function unwrapChainExpression(expression: unknown): unknown {
+function unwrapChainExpression(expression: unknown) {
 	if (!isAstNode(expression) || expression.type !== "ChainExpression") {
 		return expression
 	}
@@ -82,7 +82,7 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 		},
 	},
 	create(context) {
-		function getRemappedSourceName(node: unknown): string | null {
+		function getRemappedSourceName(node: unknown) {
 			const value = unwrapChainExpression(node)
 			if (!isAstNode(value) || value.type !== "ObjectExpression") {
 				return null

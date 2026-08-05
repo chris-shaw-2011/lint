@@ -1,16 +1,20 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
+import type { Linter } from "eslint"
 
 interface PackageJson {
 	exports?: Record<string, unknown>,
 }
 
+const typeInferencePluginName = "type-inference"
+const typeInferenceRuleName = "type-inference/no-inferrable-return-type"
+
 function assertNoTypeInferenceReferences(value: unknown, seen = new WeakSet<object>()): void {
 	if (typeof value === "string") {
 		assert.notEqual(value, "eslint-plugin-type-inference")
-		assert.notEqual(value, "type-inference")
-		assert.equal(value.startsWith("type-inference/"), false)
+		assert.notEqual(value, typeInferencePluginName)
+		assert.equal(value.startsWith(`${typeInferencePluginName}/`), false)
 		return
 	}
 
@@ -21,17 +25,33 @@ function assertNoTypeInferenceReferences(value: unknown, seen = new WeakSet<obje
 	seen.add(value)
 
 	for (const [key, child] of Object.entries(value)) {
-		assert.notEqual(key, "type-inference")
-		assert.equal(key.startsWith("type-inference/"), false)
+		assert.notEqual(key, typeInferencePluginName)
+		assert.equal(key.startsWith(`${typeInferencePluginName}/`), false)
 		assertNoTypeInferenceReferences(child, seen)
 	}
 }
 
-void test("normal and without-type-inference entry points share the same config", async () => {
+void test("normal config adds the type-inference integration to the shared config", async () => {
 	const withoutTypeInference = (await import("../src/without-type-inference.ts")).default
+	const sharedEntriesBeforeNormalImport = [...withoutTypeInference]
 	const normal = (await import("../src/index.ts")).default
 
-	assert.strictEqual(normal, withoutTypeInference)
+	assert.equal(normal.length, withoutTypeInference.length + 1)
+	assert.deepEqual(withoutTypeInference, sharedEntriesBeforeNormalImport)
+
+	for (const [index, config] of withoutTypeInference.entries()) {
+		assert.strictEqual(normal[index], config, `shared config entry ${index} should remain unchanged`)
+	}
+
+	const integration = normal.at(-1) as Linter.Config
+	assert.deepEqual(integration.files, ["**/*.{ts,tsx,mts,cts}"])
+	assert.deepEqual(integration.ignores, [
+		"**/eslint.config.{js,mjs,cjs,ts,mts,cts}",
+		"**/*.config.{js,mjs,cjs,ts,mts,cts}",
+		"**/playwright*.{js,mjs,cjs,ts,mts,cts}",
+	])
+	assert.ok(integration.plugins?.[typeInferencePluginName])
+	assert.equal(integration.rules?.[typeInferenceRuleName], "error")
 })
 
 void test("without-type-inference contains no type-inference integration", async () => {

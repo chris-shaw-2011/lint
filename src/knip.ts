@@ -14,7 +14,7 @@ const rootCodeFilePattern = "*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
 const rootSrcCodeFilePattern = "src/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
 const rootScriptsCodeFilePattern = "scripts/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}"
 
-function arrayify(value?: GlobPattern): string[] {
+function arrayify(value?: GlobPattern) {
 	if (!value) {
 		return []
 	}
@@ -22,7 +22,7 @@ function arrayify(value?: GlobPattern): string[] {
 	return Array.isArray(value) ? value : [value]
 }
 
-function unique(values: string[]): string[] {
+function unique(values: string[]) {
 	return Array.from(new Set(values))
 }
 

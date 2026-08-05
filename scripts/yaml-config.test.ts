@@ -34,7 +34,7 @@ function assertRuleDisabled(
 	rules: Record<string, unknown>,
 	ruleName: string,
 	filePath: string,
-): void {
+) {
 	assert.equal(
 		isRuleEnabled(rules[ruleName]),
 		false,

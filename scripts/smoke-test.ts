@@ -13,7 +13,7 @@ function run(
 	command: string,
 	args: string[],
 	options: ExecFileSyncOptionsWithBufferEncoding = {},
-): void {
+) {
 	process.stdout.write(`$ ${command} ${args.join(" ")}\n`)
 	execFileSync(command, args, {
 		stdio: "inherit",
@@ -21,12 +21,12 @@ function run(
 	})
 }
 
-function writeFile(filePath: string, content: string): void {
+function writeFile(filePath: string, content: string) {
 	mkdirSync(path.dirname(filePath), { recursive: true })
 	writeFileSync(filePath, content)
 }
 
-function writeJson(filePath: string, value: unknown): void {
+function writeJson(filePath: string, value: unknown) {
 	writeFile(filePath, `${JSON.stringify(value, null, "\t")}\n`)
 }
 
@@ -192,7 +192,7 @@ try {
 		[
 			"--input-type=module",
 			"-e",
-			"const normal = (await import('@chris-shaw-2011/lint')).default; const withoutTypeInference = (await import('@chris-shaw-2011/lint/without-type-inference')).default; if (normal !== withoutTypeInference) { throw new Error('Expected both entry points to share the same config') }",
+			"const normal = (await import('@chris-shaw-2011/lint')).default; const withoutTypeInference = (await import('@chris-shaw-2011/lint/without-type-inference')).default; if (normal.length !== withoutTypeInference.length + 1) { throw new Error('Unexpected shared config entry point composition') } if (!normal.at(-1)?.plugins?.['type-inference'] || normal.at(-1)?.rules?.['type-inference/no-inferrable-return-type'] !== 'error') { throw new Error('Missing normal type-inference integration') } if (withoutTypeInference.some(config => Object.keys(config.plugins ?? {}).includes('type-inference') || Object.keys(config.rules ?? {}).some(rule => rule.startsWith('type-inference/')))) { throw new Error('without-type-inference leaked the type-inference integration') }",
 		],
 		{ cwd: fixtureRoot },
 	)
