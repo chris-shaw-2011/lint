@@ -1,6 +1,6 @@
 {
 	"name": "@chris-shaw-2011/lint",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Shared lint configuration and tooling for TypeScript and React workspaces.",
 	"license": "MIT",
 	"type": "module",
@@ -10,6 +10,10 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"default": "./dist/index.js"
+		},
+		"./without-type-inference": {
+			"types": "./dist/without-type-inference.d.ts",
+			"default": "./dist/without-type-inference.js"
 		},
 		"./react": {
 			"types": "./dist/react.d.ts",

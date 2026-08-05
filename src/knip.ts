@@ -1,6 +1,6 @@
 import type { KnipConfig, WorkspaceProjectConfig } from "knip"
 
-type KnipConfigObject = Exclude<KnipConfig, (...args: unknown[]) => unknown>
+export type SharedKnipConfig = Exclude<KnipConfig, (...args: unknown[]) => unknown>
 type GlobPattern = string | string[]
 interface KnipConfigInput {
 	entry?: GlobPattern,
@@ -33,11 +33,11 @@ export const entryPatterns = [
 
 const baseConfig = {
 	entry: entryPatterns,
-} satisfies KnipConfigObject
+} satisfies SharedKnipConfig
 
 export function createKnipConfig(
 	config: KnipConfigInput = {},
-): KnipConfigObject {
+): SharedKnipConfig {
 	return {
 		...config,
 		entry: unique([...baseConfig.entry, ...arrayify(config.entry)]),

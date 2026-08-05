@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import baseConfig, { createKnipConfig, rootWorkspaceConfig, workspaceConfig } from "../src/knip.ts"
+import type { SharedKnipConfig } from "../src/knip.ts"
 
 void test("base knip config includes shared config entry patterns", () => {
 	assert.deepEqual(baseConfig.entry, [
@@ -34,13 +35,15 @@ void test("root workspace config stays scoped to root-friendly defaults", () => 
 })
 
 void test("createKnipConfig merges shared entry patterns once", () => {
+	const config: SharedKnipConfig = createKnipConfig({
+		entry: ["src/index.ts"],
+		workspaces: {
+			".": rootWorkspaceConfig(),
+		},
+	})
+
 	assert.deepEqual(
-		createKnipConfig({
-			entry: ["src/index.ts"],
-			workspaces: {
-				".": rootWorkspaceConfig(),
-			},
-		}),
+		config,
 		{
 			entry: [
 				"**/eslint.config.{js,mjs,cjs,ts,mts,cts}",

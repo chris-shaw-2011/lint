@@ -80,7 +80,7 @@ try {
 
 	writeFile(
 		path.join(fixtureRoot, "knip.config.ts"),
-		`import {\n\tcreateKnipConfig,\n\trootWorkspaceConfig,\n\tworkspaceConfig,\n} from "@chris-shaw-2011/lint/knip"\n\nexport default createKnipConfig({\n\tworkspaces: {\n\t\t".": rootWorkspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/ts-lib": workspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/react-app": workspaceConfig({\n\t\t\tentry: ["src/App.tsx"],\n\t\t}),\n\t},\n})\n`,
+		`import {\n\tcreateKnipConfig,\n\trootWorkspaceConfig,\n\tworkspaceConfig,\n\ttype SharedKnipConfig,\n} from "@chris-shaw-2011/lint/knip"\n\nconst config: SharedKnipConfig = createKnipConfig({\n\tworkspaces: {\n\t\t".": rootWorkspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/ts-lib": workspaceConfig({\n\t\t\tentry: ["src/index.ts"],\n\t\t}),\n\t\t"packages/react-app": workspaceConfig({\n\t\t\tentry: ["src/App.tsx"],\n\t\t}),\n\t},\n})\n\nexport default config\n`,
 	)
 
 	writeFile(
@@ -187,6 +187,15 @@ try {
 		env: npmEnv,
 	})
 	run("npm", ["run", "sherif", "--", "."], { cwd: fixtureRoot, env: npmEnv })
+	run(
+		"node",
+		[
+			"--input-type=module",
+			"-e",
+			"const normal = (await import('@chris-shaw-2011/lint')).default; const withoutTypeInference = (await import('@chris-shaw-2011/lint/without-type-inference')).default; if (normal !== withoutTypeInference) { throw new Error('Expected both entry points to share the same config') }",
+		],
+		{ cwd: fixtureRoot },
+	)
 	run(
 		"node",
 		[

@@ -49,6 +49,31 @@ export default [...config]
 
 Add extra config objects only when you need local overrides (for example custom rules, globals, or ignores).
 
+### `eslint-plugin-type-inference`
+
+When linting `eslint-plugin-type-inference` itself, use the configuration without
+the installed plugin and register the local implementation instead:
+
+```ts
+// eslint.config.ts
+import sharedConfig from "@chris-shaw-2011/lint/without-type-inference"
+import localTypeInference from "./src/index.ts"
+
+export default [
+	...sharedConfig,
+	{
+		plugins: {
+			"type-inference": localTypeInference,
+		},
+		rules: {
+			"type-inference/no-inferrable-return-type": "error",
+		},
+	},
+]
+```
+
+This excludes only the type-inference integration. All other shared lint rules remain enabled.
+
 ## Workspace Scripts
 
 ### Root `package.json`
@@ -88,9 +113,10 @@ import {
 	createKnipConfig,
 	rootWorkspaceConfig,
 	workspaceConfig,
+	type SharedKnipConfig,
 } from "@chris-shaw-2011/lint/knip"
 
-export default createKnipConfig({
+const config: SharedKnipConfig = createKnipConfig({
 	workspaces: {
 		".": rootWorkspaceConfig(),
 		"projects/*": workspaceConfig(),
@@ -100,6 +126,8 @@ export default createKnipConfig({
 		}),
 	},
 })
+
+export default config
 ```
 
 The shared preset already treats `eslint.config.*` files as Knip entries.
