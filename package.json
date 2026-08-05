@@ -68,18 +68,18 @@
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
 		"eslint": "^9.39.5",
-		"eslint-plugin-jsonc": "^3.3.0",
+		"eslint-plugin-jsonc": "^3.4.1",
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"eslint-plugin-react-refresh": "^0.5.3",
-		"eslint-plugin-yml": "^3.6.0",
-		"globals": "^17.7.0",
+		"eslint-plugin-yml": "^3.8.0",
+		"globals": "^17.9.0",
 		"jsonc-eslint-parser": "^3.1.0",
-		"knip": "^6.26.0",
+		"knip": "^6.31.0",
 		"sherif": "^1.13.0",
 		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.63.0"
+		"typescript-eslint": "^8.66.0"
 	},
 	"bundledDependencies": [
 		"ts-api-utils",
@@ -87,8 +87,8 @@
 	],
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@types/node": "^26.1.1",
-		"publint": "^0.3.21",
+		"@types/node": "^26.1.2",
+		"publint": "^0.3.23",
 		"rimraf": "^6.0.1"
 	},
 	"packageManager": "npm@11.6.2",
