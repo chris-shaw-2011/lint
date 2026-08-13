@@ -1,6 +1,6 @@
 {
 	"name": "@chris-shaw-2011/lint",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"description": "Shared lint configuration and tooling for TypeScript and React workspaces.",
 	"license": "MIT",
 	"type": "module",
@@ -75,16 +75,16 @@
 		"eslint-plugin-jsonc": "^3.4.1",
 		"eslint-plugin-react": "https://github.com/jsx-eslint/eslint-plugin-react/archive/b73f1108346bffb5566d17ae4cac8b13fe2b7834.tar.gz",
 		"eslint-plugin-react-hooks": "^7.1.1",
-		"eslint-plugin-react-refresh": "^0.5.3",
+		"eslint-plugin-react-refresh": "^0.5.4",
 		"eslint-plugin-type-inference": "0.1.0",
 		"eslint-plugin-yml": "^3.8.0",
-		"globals": "^17.9.0",
-		"jsonc-eslint-parser": "^3.1.0",
-		"knip": "^6.31.0",
+		"globals": "^17.11.0",
+		"jsonc-eslint-parser": "^3.3.0",
+		"knip": "^6.32.2",
 		"sherif": "^1.13.0",
 		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.66.0"
+		"typescript-eslint": "^8.67.0"
 	},
 	"bundledDependencies": [
 		"ts-api-utils",
@@ -92,7 +92,7 @@
 	],
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
-		"@types/node": "^26.1.2",
+		"@types/node": "^26.2.0",
 		"publint": "^0.3.23",
 		"rimraf": "^6.0.1"
 	},
