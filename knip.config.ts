@@ -10,13 +10,19 @@ export default createKnipConfig({
 		"src/bin/eslint.ts",
 		"src/bin/knip.ts",
 		"src/bin/sherif.ts",
+		"src/bin/stylelint.ts",
+		"src/stylelint.ts",
 	],
 	project: [
 		"src/**/*.ts",
 		"scripts/**/*.ts",
 	],
 	ignoreDependencies: [
+		"@stylistic/stylelint-config",
 		"jsonc-eslint-parser",
+		"sherif",
+		"stylelint-config-standard-scss",
+		"stylelint-scss",
 		"ts-api-utils",
 	],
 })

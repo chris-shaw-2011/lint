@@ -1,6 +1,6 @@
 # @chris-shaw-2011/lint
 
-Shared lint tooling and flat ESLint configs for TypeScript and React projects in npm workspaces.
+Shared lint tooling and configs for TypeScript, React, and SCSS projects in npm workspaces.
 
 ## Install
 
@@ -22,6 +22,7 @@ npm install -D @chris-shaw-2011/lint
 ```
 
 This installs ESLint + plugins + `knip` + `sherif` as part of the package dependency graph.
+It also installs Stylelint, `stylelint-scss`, and the shared SCSS presets.
 
 The package bundles TypeScript 6 and its `ts-api-utils` runtime for `typescript-eslint`.
 Consuming projects can install TypeScript 7 separately: their compiler uses TypeScript 7,
@@ -48,6 +49,49 @@ export default [...config]
 ```
 
 Add extra config objects only when you need local overrides (for example custom rules, globals, or ignores).
+
+## SCSS Usage
+
+Add one script to lint every SCSS file. The included `stylelint` command automatically uses this
+package's shared config, so consumers do not need a `stylelint.config.*` file:
+
+```json
+{
+  "scripts": {
+    "lint:scss": "stylelint \"**/*.scss\"",
+    "lint:scss:fix": "stylelint \"**/*.scss\" --fix"
+  }
+}
+```
+
+The preset includes `stylelint-config-standard-scss`, which contains the recommended SCSS rules
+from `stylelint-scss`, plus the maintained Stylelint stylistic preset. It uses tabs and double
+quotes to match this package's ESLint conventions. It also enforces camelCase class selectors and
+supports the CSS Modules `:global` pseudo-class while continuing to reject other unknown
+pseudo-classes. Consumers do not need to repeat these rules in a local Stylelint config.
+
+For local overrides, add a `stylelint.config.ts` and pass it to the command:
+
+```ts
+import sharedConfig from "@chris-shaw-2011/lint/stylelint"
+import type { Config } from "stylelint"
+
+export default {
+	...sharedConfig,
+	rules: {
+		...sharedConfig.rules,
+		"color-named": "never",
+	},
+} satisfies Config
+```
+
+```json
+{
+  "scripts": {
+    "lint:scss": "stylelint \"**/*.scss\" --config stylelint.config.ts"
+  }
+}
+```
 
 ### `eslint-plugin-type-inference`
 
@@ -146,13 +190,12 @@ For multi-workspace Knip configs:
 
 ## Repository Checks
 
-This repository lints itself with `eslint.config.ts` (which extends `src/index.ts`) and includes local `knip` + `sherif` checks.
+This repository lints itself with `eslint.config.ts` (which extends `src/index.ts`) and includes a local Knip check. Sherif remains part of the published toolchain and is exercised against a real npm workspace by the smoke test.
 
 ```bash
 npm run lint
 npm run typecheck
 npm run knip
-npm run sherif
 npm run publint
 npm run attw
 npm run check

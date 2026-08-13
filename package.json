@@ -1,7 +1,7 @@
 {
 	"name": "@chris-shaw-2011/lint",
 	"version": "1.2.0",
-	"description": "Shared lint configuration and tooling for TypeScript and React workspaces.",
+	"description": "Shared lint configuration and tooling for TypeScript, React, and SCSS workspaces.",
 	"license": "MIT",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -22,12 +22,17 @@
 		"./knip": {
 			"types": "./dist/knip.d.ts",
 			"default": "./dist/knip.js"
+		},
+		"./stylelint": {
+			"types": "./dist/stylelint.d.ts",
+			"default": "./dist/stylelint.js"
 		}
 	},
 	"bin": {
 		"eslint": "./dist/bin/eslint.js",
 		"knip": "./dist/bin/knip.js",
-		"sherif": "./dist/bin/sherif.js"
+		"sherif": "./dist/bin/sherif.js",
+		"stylelint": "./dist/bin/stylelint.js"
 	},
 	"files": [
 		"dist",
@@ -60,10 +65,9 @@
 		"lint:fix": "node ./node_modules/eslint/bin/eslint.js . --fix",
 		"knip": "node ./node_modules/knip/bin/knip.js --config knip.config.ts --reporter compact",
 		"knip:json": "node ./node_modules/knip/bin/knip.js --config knip.config.ts --reporter json",
-		"sherif": "node ./node_modules/sherif/index.js --ignore-rule root-package-private-field --ignore-rule root-package-dependencies",
 		"publint": "publint --pack false",
 		"attw": "npm_config_cache=/tmp/npm-cache-chris-shaw-lint attw --pack --profile esm-only .",
-		"check": "npm run lint && npm run test && npm run typecheck && npm run knip && npm run sherif && npm run publint && npm run attw",
+		"check": "npm run lint && npm run test && npm run typecheck && npm run knip && npm run publint && npm run attw",
 		"test:smoke": "node --experimental-strip-types ./scripts/smoke-test.ts",
 		"verify": "npm run build && npm run check && npm run test:smoke"
 	},
@@ -71,6 +75,7 @@
 		"@eslint/js": "^10.0.1",
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
+		"@stylistic/stylelint-config": "^5.0.0",
 		"eslint": "^10.8.1",
 		"eslint-plugin-jsonc": "^3.4.1",
 		"eslint-plugin-react": "https://github.com/jsx-eslint/eslint-plugin-react/archive/b73f1108346bffb5566d17ae4cac8b13fe2b7834.tar.gz",
@@ -82,6 +87,9 @@
 		"jsonc-eslint-parser": "^3.3.0",
 		"knip": "^6.32.2",
 		"sherif": "^1.13.0",
+		"stylelint": "^17.14.1",
+		"stylelint-config-standard-scss": "^17.0.0",
+		"stylelint-scss": "^7.2.0",
 		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.67.0"
@@ -96,8 +104,5 @@
 		"publint": "^0.3.23",
 		"rimraf": "^6.0.1"
 	},
-	"packageManager": "npm@11.6.2",
-	"workspaces": [
-		"."
-	]
+	"packageManager": "npm@11.6.2"
 }

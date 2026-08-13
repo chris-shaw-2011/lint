@@ -58,6 +58,7 @@ try {
 			"lint": "npm run lint:root && npm run lint:workspaces",
 			"lint:root": "eslint . --ignore-pattern \"packages/**\"",
 			"lint:workspaces": "npm run lint --workspaces --if-present",
+			"lint:scss": "stylelint \"**/*.scss\"",
 			"knip": "knip",
 			"sherif": "sherif",
 		},
@@ -91,6 +92,10 @@ try {
 	writeFile(
 		path.join(fixtureRoot, "src/index.ts"),
 		`const message = "lint smoke"\n\nexport function toTitle(value: string): string {\n\treturn \`\${message}: \${value}\`\n}\n`,
+	)
+	writeFile(
+		path.join(fixtureRoot, "src/styles.scss"),
+		`$brand-color: #fff;\n\n.example {\n\tcolor: $brand-color;\n\tcontent: "lint smoke";\n}\n`,
 	)
 
 	writeJson(path.join(fixtureRoot, "packages/ts-lib/package.json"), {
@@ -180,6 +185,7 @@ try {
 		throw new Error(`Installed eslint shim is not executable: ${eslintBinPath}`)
 	}
 	run("npm", ["run", "lint:root"], { cwd: fixtureRoot, env: npmEnv })
+	run("npm", ["run", "lint:scss"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:workspaces"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint", "-w", "@smoke/ts-lib"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "knip", "--", "--config", "knip.config.ts", "--reporter", "compact"], {
