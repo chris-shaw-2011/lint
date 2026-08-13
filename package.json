@@ -68,12 +68,12 @@
 		"verify": "npm run build && npm run check && npm run test:smoke"
 	},
 	"dependencies": {
-		"@eslint/js": "^9.39.5",
+		"@eslint/js": "^10.0.1",
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
-		"eslint": "^9.39.5",
+		"eslint": "^10.8.1",
 		"eslint-plugin-jsonc": "^3.4.1",
-		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react": "https://github.com/jsx-eslint/eslint-plugin-react/archive/b73f1108346bffb5566d17ae4cac8b13fe2b7834.tar.gz",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"eslint-plugin-react-refresh": "^0.5.3",
 		"eslint-plugin-type-inference": "0.1.0",
