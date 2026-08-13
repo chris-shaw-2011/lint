@@ -71,12 +71,13 @@ try {
 	writeJson(path.join(fixtureRoot, "tsconfig.json"), {
 		compilerOptions: {
 			target: "ES2022",
-			module: "NodeNext",
-			moduleResolution: "NodeNext",
+			module: "ESNext",
+			moduleResolution: "Bundler",
+			rootDirs: [".", ".generated"],
 			strict: true,
 			noEmit: true,
 		},
-		include: ["src/**/*.ts", "eslint.config.ts"],
+		include: [".generated/**/*.d.ts", "src/**/*.ts", "eslint.config.ts"],
 	})
 
 	writeFile(
@@ -91,7 +92,15 @@ try {
 
 	writeFile(
 		path.join(fixtureRoot, "src/index.ts"),
-		`const message = "lint smoke"\n\nexport function toTitle(value: string): string {\n\treturn \`\${message}: \${value}\`\n}\n`,
+		`import styles from "./smoke.module.scss"\n\nconst message = "lint smoke"\n\nexport function toTitle(value: string): string {\n\treturn \`\${styles.example}: \${message}: \${value}\`\n}\n`,
+	)
+	writeFile(
+		path.join(fixtureRoot, "src/smoke.module.scss"),
+		`.example {\n\tcolor: #fff;\n}\n`,
+	)
+	writeFile(
+		path.join(fixtureRoot, ".generated/src/smoke.module.scss.d.ts"),
+		`declare const styles: {\n\texample: string,\n}\n\nexport default styles\n`,
 	)
 	writeFile(
 		path.join(fixtureRoot, "src/styles.scss"),
@@ -186,6 +195,14 @@ try {
 	}
 	run("npm", ["run", "lint:root"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:scss"], { cwd: fixtureRoot, env: npmEnv })
+	const scssModulesUnusedBinPath = path.join(fixtureRoot, "node_modules/.bin/scss-modules-unused")
+	if ((statSync(scssModulesUnusedBinPath).mode & 0o111) === 0) {
+		throw new Error(`Installed scss-modules-unused shim is not executable: ${scssModulesUnusedBinPath}`)
+	}
+	run("npm", ["exec", "--", "scss-modules-unused", "--project", "tsconfig.json"], {
+		cwd: fixtureRoot,
+		env: npmEnv,
+	})
 	run("npm", ["run", "lint:workspaces"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint", "-w", "@smoke/ts-lib"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "knip", "--", "--config", "knip.config.ts", "--reporter", "compact"], {

@@ -93,6 +93,51 @@ export default {
 }
 ```
 
+### Unused CSS Module classes
+
+Projects that use TypeScript and SCSS CSS Modules can opt in to whole-project unused-class
+validation:
+
+```json
+{
+  "scripts": {
+    "lint:scss-modules": "scss-modules-unused --project tsconfig.json"
+  }
+}
+```
+
+Run checks in this order:
+
+1. Generate CSS Module declarations and check that they are current.
+2. Run `stylelint`.
+3. Run `scss-modules-unused`.
+4. Run `eslint`.
+
+For example:
+
+```json
+{
+  "scripts": {
+    "lint": "npm run scss-types:check && npm run lint:scss && npm run lint:scss-modules && eslint ."
+  }
+}
+```
+
+The consumer owns declaration generation because projects may choose different generators,
+class-name formats, and output layouts. The checker uses this package's bundled TypeScript runtime
+to read the default export type visible through the supplied TypeScript project, including
+declarations resolved through `rootDirs`; it does not depend on a particular SCSS type generator.
+
+The command checks only imported `*.module.scss` files. It recognizes property access, string-literal
+bracket access, object destructuring, and computed keys with statically known string-literal types.
+When the complete styles object escapes analysis or is indexed by an unrestricted string, the checker
+conservatively treats that module's classes as used. Generated properties that correspond to a
+statically declared local `@keyframes` name are excluded because they are not classes. The checker
+reports unused exported classes against the
+source `.module.scss` path and exits nonzero. It does not inspect arbitrary global SCSS, infer exports
+from SCSS syntax, or provide a fix mode. Selectors under `:global` are excluded when they are absent
+from the generated default-export type.
+
 ### `eslint-plugin-type-inference`
 
 When linting `eslint-plugin-type-inference` itself, use the configuration without

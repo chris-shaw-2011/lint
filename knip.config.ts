@@ -9,6 +9,7 @@ export default createKnipConfig({
 		"src/knip.ts",
 		"src/bin/eslint.ts",
 		"src/bin/knip.ts",
+		"src/bin/scss-modules-unused.ts",
 		"src/bin/sherif.ts",
 		"src/bin/stylelint.ts",
 		"src/stylelint.ts",
