@@ -7,8 +7,10 @@ export default createKnipConfig({
 	entry: [
 		"src/react.ts",
 		"src/knip.ts",
+		"src/bin/buf.ts",
 		"src/bin/eslint.ts",
 		"src/bin/knip.ts",
+		"src/bin/proto-style.ts",
 		"src/bin/scss-modules-unused.ts",
 		"src/bin/sherif.ts",
 		"src/bin/stylelint.ts",
@@ -19,6 +21,7 @@ export default createKnipConfig({
 		"scripts/**/*.ts",
 	],
 	ignoreDependencies: [
+		"@bufbuild/buf",
 		"@stylistic/stylelint-config",
 		"jsonc-eslint-parser",
 		"sherif",

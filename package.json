@@ -29,14 +29,17 @@
 		}
 	},
 	"bin": {
+		"buf": "./dist/bin/buf.js",
 		"eslint": "./dist/bin/eslint.js",
 		"knip": "./dist/bin/knip.js",
+		"proto-style": "./dist/bin/proto-style.js",
 		"scss-modules-unused": "./dist/bin/scss-modules-unused.js",
 		"sherif": "./dist/bin/sherif.js",
 		"stylelint": "./dist/bin/stylelint.js"
 	},
 	"files": [
 		"dist",
+		"buf.policy.yaml",
 		"README.md",
 		"LICENSE"
 	],
@@ -73,6 +76,7 @@
 		"verify": "npm run build && npm run check && npm run test:smoke"
 	},
 	"dependencies": {
+		"@bufbuild/buf": "^1.73.0",
 		"@eslint/js": "^10.0.1",
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
@@ -105,5 +109,8 @@
 		"publint": "^0.3.23",
 		"rimraf": "^6.0.1"
 	},
-	"packageManager": "npm@11.6.2"
+	"packageManager": "npm@11.6.2",
+	"allowScripts": {
+		"@bufbuild/buf@1.73.0": true
+	}
 }

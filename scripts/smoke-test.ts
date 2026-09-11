@@ -59,6 +59,7 @@ try {
 			"lint:root": "eslint . --ignore-pattern \"packages/**\"",
 			"lint:workspaces": "npm run lint --workspaces --if-present",
 			"lint:scss": "stylelint \"**/*.scss\"",
+			"lint:proto": "buf lint && proto-style",
 			"knip": "knip",
 			"sherif": "sherif",
 		},
@@ -105,6 +106,15 @@ try {
 	writeFile(
 		path.join(fixtureRoot, "src/styles.scss"),
 		`$brand-color: #fff;\n\n.example {\n\tcolor: $brand-color;\n\tcontent: "lint smoke";\n}\n`,
+	)
+
+	writeFile(
+		path.join(fixtureRoot, "buf.yaml"),
+		`version: v2\nmodules:\n  - path: proto\npolicies:\n  - policy: node_modules/@chris-shaw-2011/lint/buf.policy.yaml\n`,
+	)
+	writeFile(
+		path.join(fixtureRoot, "proto/smoke/v1/smoke.proto"),
+		`syntax = "proto3";\n\npackage smoke.v1;\n\nmessage Smoke {\n\tstring message = 1;\n}\n`,
 	)
 
 	writeJson(path.join(fixtureRoot, "packages/ts-lib/package.json"), {
@@ -193,6 +203,17 @@ try {
 	if (eslintBinMode === 0) {
 		throw new Error(`Installed eslint shim is not executable: ${eslintBinPath}`)
 	}
+	const bufBinPath = path.join(fixtureRoot, "node_modules/.bin/buf")
+	const bufBinMode = statSync(bufBinPath).mode & 0o111
+	if (bufBinMode === 0) {
+		throw new Error(`Installed buf shim is not executable: ${bufBinPath}`)
+	}
+	const protoStyleBinPath = path.join(fixtureRoot, "node_modules/.bin/proto-style")
+	const protoStyleBinMode = statSync(protoStyleBinPath).mode & 0o111
+	if (protoStyleBinMode === 0) {
+		throw new Error(`Installed proto-style shim is not executable: ${protoStyleBinPath}`)
+	}
+	run("npm", ["run", "lint:proto"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:root"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:scss"], { cwd: fixtureRoot, env: npmEnv })
 	const scssModulesUnusedBinPath = path.join(fixtureRoot, "node_modules/.bin/scss-modules-unused")

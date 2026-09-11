@@ -1,6 +1,6 @@
 # @chris-shaw-2011/lint
 
-Shared lint tooling and configs for TypeScript, React, and SCSS projects in npm workspaces.
+Shared lint tooling and configs for TypeScript, React, SCSS, and Protobuf projects in npm workspaces.
 
 ## Install
 
@@ -21,8 +21,9 @@ Create or update `.npmrc` in the consuming repository:
 npm install -D @chris-shaw-2011/lint
 ```
 
-This installs ESLint + plugins + `knip` + `sherif` as part of the package dependency graph.
+This installs ESLint + plugins + `knip` + `sherif` + Buf as part of the package dependency graph.
 It also installs Stylelint, `stylelint-scss`, and the shared SCSS presets.
+The package also ships a shared Buf policy using Buf's `STANDARD` Protobuf lint rules.
 
 The package bundles TypeScript 6 and its `ts-api-utils` runtime for `typescript-eslint`.
 Consuming projects can install TypeScript 7 separately: their compiler uses TypeScript 7,
@@ -49,6 +50,57 @@ export default [...config]
 ```
 
 Add extra config objects only when you need local overrides (for example custom rules, globals, or ignores).
+
+## Protobuf Usage
+
+The included `buf` command uses the package's pinned Buf CLI dependency. Configure each consuming
+repository with a `buf.yaml` that identifies its Protobuf module and references the shared policy:
+
+```yaml
+version: v2
+modules:
+  - path: proto
+policies:
+  - policy: node_modules/@chris-shaw-2011/lint/buf.policy.yaml
+```
+
+Change `proto` if the repository stores `.proto` files somewhere else.
+
+Add Buf and the included zero-dependency `proto-style` checker to the repository's lint scripts:
+
+```json
+{
+  "scripts": {
+    "lint:proto": "buf lint && proto-style"
+  }
+}
+```
+
+Then include `npm run lint:proto` in the repository's normal lint/check pipeline. Buf's shared
+policy currently enables its recommended `STANDARD` rule set. `proto-style` recursively checks
+`.proto` files from the current directory and enforces source-only conventions that do not affect
+generated code:
+
+- indentation must use tabs rather than spaces
+- trailing whitespace is rejected
+- line endings must use LF
+- files must end with a newline
+
+You can also pass one or more files or directories directly, for example
+`proto-style proto shared/proto`.
+
+### VS Code
+
+Install the official `bufbuild.vscode-buf` extension to surface build and lint diagnostics directly
+on `.proto` files. The extension can use the project-local Buf executable:
+
+```json
+{
+  "buf.commandLine.path": "./node_modules/.bin/buf"
+}
+```
+
+This keeps command-line linting and editor diagnostics on the Buf version supplied by this package.
 
 ## SCSS Usage
 
