@@ -194,7 +194,7 @@ try {
 		[
 			"--input-type=module",
 			"-e",
-			`import { createRequire } from "node:module"; const projectRequire = createRequire(import.meta.url); const lintRequire = createRequire(projectRequire.resolve("@chris-shaw-2011/lint")); if (!projectRequire("typescript").version.startsWith("7.")) { throw new Error("Smoke fixture did not install TypeScript 7.") } if (lintRequire("typescript").version !== "6.0.3") { throw new Error("Lint package did not resolve its bundled TypeScript 6 runtime.") } if (!lintRequire.resolve("ts-api-utils").includes("@chris-shaw-2011/lint/node_modules")) { throw new Error("Lint package did not resolve its bundled ts-api-utils runtime.") }`,
+			`import { createRequire } from "node:module"; const projectRequire = createRequire(import.meta.url); const lintRequire = createRequire(projectRequire.resolve("@chris-shaw-2011/lint")); if (!projectRequire("typescript").version.startsWith("7.")) { throw new Error("Smoke fixture did not install TypeScript 7.") } if (lintRequire("typescript").version !== "6.0.3") { throw new Error("Lint package did not resolve its bundled TypeScript 6 runtime.") } if (!lintRequire.resolve("ts-api-utils").includes("@chris-shaw-2011/lint/node_modules")) { throw new Error("Lint package did not resolve its bundled ts-api-utils runtime.") } if (!lintRequire.resolve("@eslint-react/eslint-plugin/package.json").includes("@chris-shaw-2011/lint/node_modules")) { throw new Error("Lint package did not resolve its bundled ESLint React runtime.") }`,
 		],
 		{ cwd: fixtureRoot },
 	)

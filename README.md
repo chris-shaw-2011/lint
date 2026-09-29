@@ -25,7 +25,8 @@ This installs ESLint + plugins + `knip` + `sherif` + Buf as part of the package 
 It also installs Stylelint, `stylelint-scss`, and the shared SCSS presets.
 The package also ships a shared Buf policy using Buf's `STANDARD` Protobuf lint rules.
 
-The package bundles TypeScript 6 and its `ts-api-utils` runtime for `typescript-eslint`.
+The package bundles TypeScript 6, its `ts-api-utils` runtime, and the ESLint React runtime for
+type-aware linting.
 Consuming projects can install TypeScript 7 separately: their compiler uses TypeScript 7,
 while this package's linting stack continues to use TypeScript 6.
 
@@ -48,6 +49,15 @@ import config from "@chris-shaw-2011/lint/react"
 
 export default [...config]
 ```
+
+The React config uses ESLint React's `strict-type-checked` preset across its React/core, JSX,
+React Server Components, DOM, Web API, and naming-convention rule families. It enables additional
+rules for DOM properties, explicitly passed React-special props, duplicate keys, display names,
+and unused state. The official React Hooks and React Refresh recommended presets remain enabled;
+overlapping ESLint React hook/compiler rules are disabled so each problem has one diagnostic.
+
+The React config assumes typed React code. It does not retain legacy validation for untyped
+`propTypes`, string refs, `isMounted`, or class render methods.
 
 Add extra config objects only when you need local overrides (for example custom rules, globals, or ignores).
 

@@ -1,10 +1,11 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
+import eslintReact from "@eslint-react/eslint-plugin"
 import type { Linter } from "eslint"
-import reactPlugin from "eslint-plugin-react"
 
 interface PackageJson {
+	dependencies?: Record<string, string>,
 	exports?: Record<string, unknown>,
 }
 
@@ -76,16 +77,59 @@ void test("package declares the without-type-inference export", () => {
 	})
 })
 
-void test("React config combines recommended and JSX-runtime rules", async () => {
+void test("React config enables strict type-checked rules and curated additions", async () => {
 	const reactConfig = (await import("../src/react.ts")).default
+	const hooksPreset = reactConfig.find(config => config.plugins?.["react-hooks"])
+	const refreshPreset = reactConfig.find(config => config.plugins?.["react-refresh"])
+	const preset = reactConfig.at(-2) as Linter.Config
 	const integration = reactConfig.at(-1) as Linter.Config
 
+	assert.equal(hooksPreset?.rules?.["react-hooks/rules-of-hooks"], "error")
+	assert.deepEqual(refreshPreset?.rules?.["react-refresh/only-export-components"], ["error", {}])
+	assert.match(preset.name ?? "", /@eslint-react\/strict-type-checked$/v)
+	assert.deepEqual(preset.files, ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"])
+	assert.deepEqual(preset.rules, eslintReact.configs["strict-type-checked"].rules)
+	assert.strictEqual(preset.plugins?.["@eslint-react"], eslintReact)
 	assert.deepEqual(integration.files, ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"])
-	assert.deepEqual(integration.rules, {
-		...reactPlugin.configs.flat.recommended.rules,
-		...reactPlugin.configs.flat["jsx-runtime"].rules,
-	})
-	assert.equal(integration.rules["react/jsx-key"], 2)
-	assert.equal(integration.rules["react/react-in-jsx-scope"], 0)
-	assert.equal(integration.rules["react/jsx-uses-react"], 0)
+	const configuredGlobals = integration.languageOptions?.globals as Record<string, boolean> | undefined
+	assert.ok(configuredGlobals)
+	assert.equal(configuredGlobals.window, false)
+	assert.equal(configuredGlobals.self, false)
+
+	for (const ruleName of [
+		"@eslint-react/dom-no-string-style-prop",
+		"@eslint-react/dom-no-unknown-property",
+		"@eslint-react/no-duplicate-key",
+		"@eslint-react/no-implicit-children",
+		"@eslint-react/no-implicit-key",
+		"@eslint-react/no-implicit-ref",
+		"@eslint-react/no-missing-component-display-name",
+		"@eslint-react/no-missing-context-display-name",
+		"@eslint-react/no-unused-state",
+	]) {
+		assert.equal(integration.rules?.[ruleName], "error", `${ruleName} should be enabled`)
+	}
+
+	for (const ruleName of [
+		"@eslint-react/error-boundaries",
+		"@eslint-react/exhaustive-deps",
+		"@eslint-react/purity",
+		"@eslint-react/rules-of-hooks",
+		"@eslint-react/set-state-in-effect",
+		"@eslint-react/set-state-in-render",
+		"@eslint-react/static-components",
+		"@eslint-react/unsupported-syntax",
+		"@eslint-react/use-memo",
+	]) {
+		assert.equal(integration.rules?.[ruleName], "off", `${ruleName} should defer to react-hooks`)
+	}
+})
+
+void test("package uses ESLint React instead of the patched legacy plugin", () => {
+	const packageJson = JSON.parse(
+		readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+	) as PackageJson
+
+	assert.match(packageJson.dependencies?.["@eslint-react/eslint-plugin"] ?? "", /^\^/v)
+	assert.equal(packageJson.dependencies?.["eslint-plugin-react"], undefined)
 })

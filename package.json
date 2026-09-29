@@ -1,6 +1,6 @@
 {
 	"name": "@chris-shaw-2011/lint",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"description": "Shared lint configuration and tooling for TypeScript, React, and SCSS workspaces.",
 	"license": "MIT",
 	"type": "module",
@@ -77,13 +77,13 @@
 	},
 	"dependencies": {
 		"@bufbuild/buf": "^1.73.0",
+		"@eslint-react/eslint-plugin": "^5.23.1",
 		"@eslint/js": "^10.0.1",
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
 		"@stylistic/stylelint-config": "^5.0.0",
 		"eslint": "^10.10.0",
 		"eslint-plugin-jsonc": "^3.4.2",
-		"eslint-plugin-react": "https://github.com/jsx-eslint/eslint-plugin-react/archive/b73f1108346bffb5566d17ae4cac8b13fe2b7834.tar.gz",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"eslint-plugin-react-refresh": "^0.5.6",
 		"eslint-plugin-type-inference": "0.1.0",
@@ -97,12 +97,8 @@
 		"stylelint-scss": "^7.2.0",
 		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.70.0"
+		"typescript-eslint": "^8.71.0"
 	},
-	"bundledDependencies": [
-		"ts-api-utils",
-		"typescript"
-	],
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
 		"@types/node": "^26.5.1",
@@ -112,5 +108,10 @@
 	"packageManager": "npm@11.6.2",
 	"allowScripts": {
 		"@bufbuild/buf@1.73.0": true
-	}
+	},
+	"bundleDependencies": [
+		"@eslint-react/eslint-plugin",
+		"ts-api-utils",
+		"typescript"
+	]
 }
