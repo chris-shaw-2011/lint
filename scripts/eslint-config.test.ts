@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 import type { Linter } from "eslint"
+import reactPlugin from "eslint-plugin-react"
 
 interface PackageJson {
 	exports?: Record<string, unknown>,
@@ -73,4 +74,18 @@ void test("package declares the without-type-inference export", () => {
 		types: "./dist/without-type-inference.d.ts",
 		default: "./dist/without-type-inference.js",
 	})
+})
+
+void test("React config combines recommended and JSX-runtime rules", async () => {
+	const reactConfig = (await import("../src/react.ts")).default
+	const integration = reactConfig.at(-1) as Linter.Config
+
+	assert.deepEqual(integration.files, ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"])
+	assert.deepEqual(integration.rules, {
+		...reactPlugin.configs.flat.recommended.rules,
+		...reactPlugin.configs.flat["jsx-runtime"].rules,
+	})
+	assert.equal(integration.rules["react/jsx-key"], 2)
+	assert.equal(integration.rules["react/react-in-jsx-scope"], 0)
+	assert.equal(integration.rules["react/jsx-uses-react"], 0)
 })
