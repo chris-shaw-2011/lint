@@ -1,6 +1,6 @@
 {
 	"name": "@chris-shaw-2011/lint",
-	"version": "1.4.3",
+	"version": "1.4.4",
 	"description": "Shared lint configuration and tooling for TypeScript, React, and SCSS workspaces.",
 	"license": "MIT",
 	"type": "module",
@@ -76,13 +76,13 @@
 		"verify": "npm run build && npm run check && npm run test:smoke"
 	},
 	"dependencies": {
-		"@bufbuild/buf": "^1.73.0",
-		"@eslint-react/eslint-plugin": "^5.24.10",
+		"@bufbuild/buf": "^1.75.0",
+		"@eslint-react/eslint-plugin": "^5.28.8",
 		"@eslint/js": "^10.0.1",
 		"@eslint/markdown": "^8.0.3",
 		"@stylistic/eslint-plugin": "^5.7.1",
 		"@stylistic/stylelint-config": "^5.0.0",
-		"eslint": "^10.12.0",
+		"eslint": "^10.13.0",
 		"eslint-plugin-jsonc": "^3.4.2",
 		"eslint-plugin-react-hooks": "^7.1.1",
 		"eslint-plugin-react-refresh": "^0.5.6",
@@ -90,14 +90,14 @@
 		"eslint-plugin-yml": "^3.9.0",
 		"globals": "^17.13.0",
 		"jsonc-eslint-parser": "^3.3.0",
-		"knip": "^6.41.0",
+		"knip": "^6.42.1",
 		"sherif": "^1.13.0",
 		"stylelint": "^17.16.0",
 		"stylelint-config-standard-scss": "^17.0.0",
 		"stylelint-scss": "^7.2.0",
 		"ts-api-utils": "^2.5.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.71.1"
+		"typescript-eslint": "^8.72.0"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
@@ -107,7 +107,7 @@
 	},
 	"packageManager": "npm@11.6.2",
 	"allowScripts": {
-		"@bufbuild/buf@1.73.0": true
+		"@bufbuild/buf@1.75.0": true
 	},
 	"overrides": {
 		"katex": "0.19.0"
