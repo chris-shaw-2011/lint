@@ -1,10 +1,10 @@
 import { defineConfig } from "eslint/config"
 import typeInference from "eslint-plugin-type-inference"
-import type { Linter } from "eslint"
+import type { CompatiblePlugin } from "typescript-eslint"
 import config from "./without-type-inference.ts"
 import { tsFiles, typeUncheckedConfigFiles } from "./file-patterns.ts"
 
-type FlatPlugin = NonNullable<Linter.Config["plugins"]>[string]
+const typeInferencePlugin: CompatiblePlugin = typeInference
 
 export default defineConfig(
 	...config,
@@ -12,7 +12,7 @@ export default defineConfig(
 		files: tsFiles,
 		ignores: typeUncheckedConfigFiles,
 		plugins: {
-			"type-inference": typeInference as unknown as FlatPlugin,
+			"type-inference": typeInferencePlugin,
 		},
 		rules: {
 			"type-inference/no-inferrable-return-type": "error",

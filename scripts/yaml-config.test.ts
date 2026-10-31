@@ -42,26 +42,19 @@ function assertRuleDisabled(
 	)
 }
 
+function isResolvedConfig(value: unknown): value is ResolvedConfig {
+	return typeof value === "object" && value !== null &&
+		"rules" in value && typeof value.rules === "object" && value.rules !== null
+}
+
 async function getConfigForFile(filePath: string): Promise<ResolvedConfig> {
 	const config: unknown = await eslint.calculateConfigForFile(filePath)
 
-	if (!config || typeof config !== "object") {
+	if (!isResolvedConfig(config)) {
 		throw new Error(`Expected a resolved config object for ${filePath}.`)
 	}
 
-	const { language, rules } = config as {
-		language?: unknown,
-		rules?: unknown,
-	}
-
-	if (!rules || typeof rules !== "object") {
-		throw new Error(`Expected resolved rules for ${filePath}.`)
-	}
-
-	return {
-		language,
-		rules: rules as Record<string, unknown>,
-	}
+	return config
 }
 
 void test("yaml files only keep YAML rule families", async () => {

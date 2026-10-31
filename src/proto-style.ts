@@ -25,17 +25,21 @@ const ignoredDirectoryNames = new Set([
 
 function addProtoFiles(inputPath: string, files: Set<string>) {
 	const absolutePath = path.resolve(inputPath)
+
 	if (!existsSync(absolutePath)) {
 		throw new Error(`Path does not exist: ${inputPath}`)
 	}
 
 	const stats = statSync(absolutePath)
+
 	if (stats.isFile()) {
 		if (absolutePath.endsWith(".proto")) {
 			files.add(absolutePath)
 		}
+
 		return
 	}
+
 	if (!stats.isDirectory()) {
 		return
 	}
@@ -47,9 +51,11 @@ function addProtoFiles(inputPath: string, files: Set<string>) {
 		if (entry.isDirectory() && ignoredDirectoryNames.has(entry.name)) {
 			continue
 		}
+
 		if (!entry.isDirectory() && !entry.isFile()) {
 			continue
 		}
+
 		addProtoFiles(path.join(absolutePath, entry.name), files)
 	}
 }
@@ -61,6 +67,7 @@ export function lintProtoText(filePath: string, text: string) {
 	for (let index = 0; index < lines.length; index += 1) {
 		const rawLine = lines[index] ?? ""
 		const carriageReturnIndex = rawLine.indexOf("\r")
+
 		if (carriageReturnIndex >= 0) {
 			issues.push({
 				filePath,
@@ -73,6 +80,7 @@ export function lintProtoText(filePath: string, text: string) {
 
 		const line = rawLine.replaceAll("\r", "")
 		const indentation = /^[\t ]+/.exec(line)?.[0]
+
 		if (line.trim().length > 0 && indentation?.includes(" ")) {
 			issues.push({
 				filePath,
@@ -84,6 +92,7 @@ export function lintProtoText(filePath: string, text: string) {
 		}
 
 		const trailingWhitespace = /[\t ]+$/.exec(line)?.[0]
+
 		if (trailingWhitespace) {
 			issues.push({
 				filePath,
@@ -97,6 +106,7 @@ export function lintProtoText(filePath: string, text: string) {
 
 	if (text.length > 0 && !text.endsWith("\n")) {
 		const lastLine = lines.at(-1) ?? ""
+
 		issues.push({
 			filePath,
 			line: lines.length,
@@ -118,9 +128,12 @@ export function lintProtoPaths(inputPaths: readonly string[]) {
 	}
 
 	const issues: ProtoStyleIssue[] = []
+
 	for (const filePath of [...files].sort()) {
 		const displayPath = path.relative(process.cwd(), filePath) || path.basename(filePath)
+
 		issues.push(...lintProtoText(displayPath, readFileSync(filePath, "utf8")))
 	}
+
 	return issues
 }

@@ -32,6 +32,7 @@ function formatTsDiagnostic(diagnostic: ts.Diagnostic) {
 
 function loadProject(projectPath: string) {
 	const configFile = ts.readConfigFile(projectPath, filePath => ts.sys.readFile(filePath))
+
 	if (configFile.error) {
 		throw new Error(`Unable to load TypeScript project '${projectPath}': ${formatTsDiagnostic(configFile.error)}`)
 	}
@@ -43,6 +44,7 @@ function loadProject(projectPath: string) {
 		undefined,
 		projectPath,
 	)
+
 	if (parsed.errors.length > 0) {
 		throw new Error(`Unable to load TypeScript project '${projectPath}': ${parsed.errors.map(formatTsDiagnostic).join("\n")}`)
 	}
@@ -56,6 +58,7 @@ function removeDeclarationSuffix(filePath: string) {
 			return filePath.slice(0, -suffix.length)
 		}
 	}
+
 	return undefined
 }
 
@@ -67,6 +70,7 @@ function findStylesheetPath(
 ) {
 	if (moduleName.startsWith(".")) {
 		const importedPath = path.resolve(path.dirname(sourceFile.fileName), moduleName)
+
 		if (existsSync(importedPath)) {
 			return importedPath
 		}
@@ -74,6 +78,7 @@ function findStylesheetPath(
 
 	if (resolvedDeclarationPath) {
 		const declarationTarget = removeDeclarationSuffix(resolvedDeclarationPath)
+
 		if (declarationTarget) {
 			if (existsSync(declarationTarget)) {
 				return declarationTarget
@@ -81,11 +86,14 @@ function findStylesheetPath(
 
 			for (const sourceRoot of options.rootDirs ?? []) {
 				const relativePath = path.relative(sourceRoot, declarationTarget)
+
 				if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
 					continue
 				}
+
 				for (const targetRoot of options.rootDirs ?? []) {
 					const candidate = path.resolve(targetRoot, relativePath)
+
 					if (existsSync(candidate)) {
 						return candidate
 					}
@@ -103,28 +111,37 @@ function getStringLiteralKeys(checker: ts.TypeChecker, type: ts.Type): Set<strin
 	if (type.isStringLiteral()) {
 		return new Set([type.value])
 	}
+
 	if (type.isUnion()) {
 		const keys = new Set<string>()
+
 		for (const member of type.types) {
 			const memberKeys = getStringLiteralKeys(checker, member)
+
 			if (!memberKeys) {
 				return undefined
 			}
+
 			for (const key of memberKeys) {
 				keys.add(key)
 			}
 		}
+
 		return keys
 	}
+
 	if ((type.flags & ts.TypeFlags.TypeParameter) !== 0) {
 		const constraint = checker.getBaseConstraintOfType(type)
+
 		return constraint && constraint !== type ?
 				getStringLiteralKeys(checker, constraint) :
 			undefined
 	}
+
 	if ((type.flags & ts.TypeFlags.Never) !== 0) {
 		return new Set()
 	}
+
 	return undefined
 }
 
@@ -137,15 +154,20 @@ function addElementAccessUsage(
 		for (const className of moduleUsage.classNames) {
 			moduleUsage.usedClassNames.add(className)
 		}
+
 		return
 	}
+
 	const keys = getStringLiteralKeys(checker, checker.getTypeAtLocation(argument))
+
 	if (!keys) {
 		for (const className of moduleUsage.classNames) {
 			moduleUsage.usedClassNames.add(className)
 		}
+
 		return
 	}
+
 	for (const key of keys) {
 		moduleUsage.usedClassNames.add(key)
 	}
@@ -157,9 +179,12 @@ function addDestructuringUsage(moduleUsage: ModuleUsage, pattern: ts.ObjectBindi
 			for (const className of moduleUsage.classNames) {
 				moduleUsage.usedClassNames.add(className)
 			}
+
 			continue
 		}
+
 		const propertyName = element.propertyName ?? element.name
+
 		if (ts.isIdentifier(propertyName) || ts.isStringLiteralLike(propertyName)) {
 			moduleUsage.usedClassNames.add(propertyName.text)
 		}
@@ -181,15 +206,18 @@ function getKeyframeNames(stylesheetPath: string) {
 	if (!path.isAbsolute(stylesheetPath) || !existsSync(stylesheetPath)) {
 		return new Set<string>()
 	}
+
 	const stylesheet = readFileSync(stylesheetPath, "utf8")
 		.replaceAll(/\/\*[\s\S]*?\*\//g, "")
 		.replaceAll(/\/\/.*$/gm, "")
 	const names = new Set<string>()
+
 	for (const match of stylesheet.matchAll(/@(?:-webkit-)?keyframes\s+([\w-]+)/g)) {
 		if (match[1]) {
 			names.add(match[1])
 		}
 	}
+
 	return names
 }
 
@@ -200,8 +228,10 @@ function collectBindingUsage(
 	moduleUsage: ModuleUsage,
 ) {
 	const bindingSymbol = checker.getSymbolAtLocation(binding)
+
 	if (!bindingSymbol) {
 		markAllUsed(moduleUsage)
+
 		return
 	}
 
@@ -209,32 +239,43 @@ function collectBindingUsage(
 		if (sourceFile.isDeclarationFile) {
 			continue
 		}
+
 		const visit = (node: ts.Node): void => {
 			if (ts.isIdentifier(node) && checker.getSymbolAtLocation(node) === bindingSymbol) {
 				const parent = node.parent
+
 				if (ts.isImportClause(parent) && parent.name === node) {
 					return
 				}
+
 				if (ts.isPropertyAccessExpression(parent) && parent.expression === node) {
 					moduleUsage.usedClassNames.add(parent.name.text)
+
 					return
 				}
+
 				if (ts.isElementAccessExpression(parent) && parent.expression === node) {
 					addElementAccessUsage(checker, moduleUsage, parent.argumentExpression)
+
 					return
 				}
+
 				if (
 					ts.isVariableDeclaration(parent) &&
 					parent.initializer === node &&
 					ts.isObjectBindingPattern(parent.name)
 				) {
 					addDestructuringUsage(moduleUsage, parent.name)
+
 					return
 				}
+
 				markAllUsed(moduleUsage)
 			}
+
 			ts.forEachChild(node, visit)
 		}
+
 		visit(sourceFile)
 	}
 }
@@ -244,11 +285,14 @@ function getDefaultExportType(
 	moduleSpecifier: ts.StringLiteralLike,
 ) {
 	const moduleSymbol = checker.getSymbolAtLocation(moduleSpecifier)
+
 	if (!moduleSymbol) {
 		return undefined
 	}
+
 	const defaultExport = checker.getExportsOfModule(moduleSymbol)
 		.find(symbol => symbol.name === "default")
+
 	return defaultExport ?
 			checker.getTypeOfSymbolAtLocation(defaultExport, moduleSpecifier) :
 		undefined
@@ -271,6 +315,7 @@ export function findUnusedScssModuleClasses(projectPath: string): ScssModulesUnu
 		if (sourceFile.isDeclarationFile) {
 			continue
 		}
+
 		for (const statement of sourceFile.statements) {
 			if (
 				!ts.isImportDeclaration(statement) ||
@@ -288,6 +333,7 @@ export function findUnusedScssModuleClasses(projectPath: string): ScssModulesUnu
 			const properties = defaultType && (defaultType.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) === 0 ?
 					checker.getPropertiesOfType(defaultType) :
 					[]
+
 			if (properties.length === 0) {
 				errors.set(stylesheetPath, {
 					filePath: stylesheetPath,
@@ -298,6 +344,7 @@ export function findUnusedScssModuleClasses(projectPath: string): ScssModulesUnu
 
 			const keyframeNames = getKeyframeNames(stylesheetPath)
 			let moduleUsage = modules.get(stylesheetPath)
+
 			if (!moduleUsage) {
 				moduleUsage = {
 					classNames: new Set(properties
@@ -317,6 +364,7 @@ export function findUnusedScssModuleClasses(projectPath: string): ScssModulesUnu
 			}
 
 			const binding = statement.importClause?.name
+
 			if (binding) {
 				bindings.push({ binding, moduleUsage })
 			}
@@ -346,13 +394,16 @@ export function findUnusedScssModuleClasses(projectPath: string): ScssModulesUnu
 function getProjectArgument(args: string[]) {
 	for (let index = 0; index < args.length; index += 1) {
 		const argument = args[index]
+
 		if (argument === "--project") {
 			return args[index + 1]
 		}
+
 		if (argument.startsWith("--project=")) {
 			return argument.slice("--project=".length)
 		}
 	}
+
 	return undefined
 }
 
@@ -363,26 +414,34 @@ export function runScssModulesUnusedCli(
 ): number {
 	if (args.includes("--help") || args.includes("-h")) {
 		output.log("Usage: scss-modules-unused --project <tsconfig.json>")
+
 		return 0
 	}
+
 	const projectArgument = getProjectArgument(args)
+
 	if (!projectArgument) {
 		output.error("Missing required --project <tsconfig.json> argument.")
+
 		return 2
 	}
 
 	try {
 		const result = findUnusedScssModuleClasses(path.resolve(cwd, projectArgument))
+
 		for (const error of result.errors) {
 			output.error(`${error.filePath}: ${error.message}`)
 		}
+
 		for (const diagnostic of result.diagnostics) {
 			output.error(`${diagnostic.filePath}: ${diagnostic.message}`)
 		}
+
 		return result.errors.length > 0 || result.diagnostics.length > 0 ? 1 : 0
 	}
 	catch (error) {
 		output.error(error instanceof Error ? error.message : String(error))
+
 		return 2
 	}
 }

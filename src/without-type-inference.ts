@@ -12,21 +12,24 @@ interface AstNode {
 	type: string,
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null
+}
+
 function isAstNode(value: unknown): value is AstNode {
-	if (typeof value !== "object" || value === null) {
-		return false
-	}
-	return "type" in value && typeof (value as { type?: unknown }).type === "string"
+	return isRecord(value) && typeof value.type === "string"
 }
 
 function getAstProperty(value: unknown, key: string) {
-	if (typeof value !== "object" || value === null) {
+	if (!isRecord(value)) {
 		return undefined
 	}
+
 	if (!(key in value)) {
 		return undefined
 	}
-	return (value as Record<string, unknown>)[key]
+
+	return value[key]
 }
 
 function isTruthyBooleanProperty(value: unknown, key: string) {
@@ -37,7 +40,9 @@ function getIdentifierName(node: unknown) {
 	if (!isAstNode(node) || node.type !== "Identifier") {
 		return null
 	}
+
 	const name = getAstProperty(node, "name")
+
 	return typeof name === "string" ? name : null
 }
 
@@ -52,9 +57,11 @@ function getStaticPropertyName(node: unknown) {
 
 	if (node.type === "Literal") {
 		const value = getAstProperty(node, "value")
+
 		if (typeof value === "string") {
 			return value
 		}
+
 		if (typeof value === "number") {
 			return String(value)
 		}
@@ -67,6 +74,7 @@ function unwrapChainExpression(expression: unknown) {
 	if (!isAstNode(expression) || expression.type !== "ChainExpression") {
 		return expression
 	}
+
 	return getAstProperty(expression, "expression")
 }
 
@@ -84,11 +92,13 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 	create(context) {
 		function getRemappedSourceName(node: unknown) {
 			const value = unwrapChainExpression(node)
+
 			if (!isAstNode(value) || value.type !== "ObjectExpression") {
 				return null
 			}
 
 			const properties = getAstProperty(value, "properties")
+
 			if (!Array.isArray(properties) || properties.length < 2) {
 				return null
 			}
@@ -99,6 +109,7 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 				if (!isAstNode(property) || property.type !== "Property") {
 					return null
 				}
+
 				if (
 					getAstProperty(property, "kind") !== "init" ||
 					isTruthyBooleanProperty(property, "method") ||
@@ -108,14 +119,17 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 				}
 
 				const keyName = getStaticPropertyName(getAstProperty(property, "key"))
+
 				if (!keyName) {
 					return null
 				}
 
 				const memberValue = unwrapChainExpression(getAstProperty(property, "value"))
+
 				if (!isAstNode(memberValue) || memberValue.type !== "MemberExpression") {
 					return null
 				}
+
 				if (
 					isTruthyBooleanProperty(memberValue, "computed") ||
 					isTruthyBooleanProperty(memberValue, "optional")
@@ -125,11 +139,13 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 
 				const valueObject = unwrapChainExpression(getAstProperty(memberValue, "object"))
 				const objectName = getIdentifierName(valueObject)
+
 				if (!objectName) {
 					return null
 				}
 
 				const valuePropertyName = getStaticPropertyName(getAstProperty(memberValue, "property"))
+
 				if (!valuePropertyName || valuePropertyName !== keyName) {
 					return null
 				}
@@ -150,6 +166,7 @@ const noRedundantObjectRemapRule: Rule.RuleModule = {
 		return {
 			ObjectExpression(node) {
 				const sourceName = getRemappedSourceName(node)
+
 				if (!sourceName) {
 					return
 				}
@@ -170,6 +187,7 @@ const jsTsFiles = ["**/*.{js,mjs,cjs,jsx,mjsx,ts,mts,cts,tsx,mtsx}"]
 const jsonFiles = ["*.{json,jsonc,json5}", "**/*.{json,jsonc,json5}"]
 const yamlFiles = ["*.{yml,yaml}", "**/*.{yml,yaml}"]
 const markdownFiles = ["*.md", "**/*.md"]
+
 export default defineConfig(
 	{
 		ignores: [
@@ -193,6 +211,18 @@ export default defineConfig(
 				jsx: true,
 			}),
 		],
+		rules: {
+			"curly": ["error", "all"],
+			"@stylistic/brace-style": ["error", "stroustrup", { allowSingleLine: false }],
+			"@stylistic/padding-line-between-statements": [
+				"error",
+				{ blankLine: "always", prev: "*", next: ["if", "for", "while", "do", "switch", "try"] },
+				{ blankLine: "always", prev: ["if", "for", "while", "do", "switch", "try"], next: "*" },
+				{ blankLine: "always", prev: "*", next: "return" },
+				{ blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+				{ blankLine: "any", prev: ["const", "let", "var"], next: ["const", "let", "var"] },
+			],
+		},
 	},
 	{
 		files: tsFiles,
@@ -225,6 +255,7 @@ export default defineConfig(
 				},
 			],
 			"@typescript-eslint/no-floating-promises": "error",
+			"@typescript-eslint/no-unsafe-type-assertion": "error",
 			"@typescript-eslint/no-deprecated": "warn",
 			"no-use-before-define": "off",
 			"@typescript-eslint/no-use-before-define": ["error"],

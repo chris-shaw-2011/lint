@@ -20,6 +20,7 @@ function writeJson(filePath: string, value: unknown) {
 function createFixture() {
 	const root = mkdtempSync(path.join(tmpdir(), "scss-modules-unused-"))
 	const projectRoot = path.join(root, "packages/client")
+
 	writeJson(path.join(root, "package.json"), {
 		private: true,
 		workspaces: ["packages/*"],
@@ -33,6 +34,7 @@ function createFixture() {
 		},
 		include: [".generated/**/*.d.ts", "src/**/*.ts", "src/**/*.tsx"],
 	})
+
 	return { projectRoot, root }
 }
 
@@ -53,6 +55,7 @@ function writeModule(
 
 void test("finds unused classes while aggregating supported usage across a rootDirs workspace", () => {
 	const { projectRoot, root } = createFixture()
+
 	try {
 		writeModule(projectRoot, "Main", [
 			"directClass",
@@ -96,6 +99,7 @@ void test("finds unused classes while aggregating supported usage across a rootD
 		)
 
 		const result = findUnusedScssModuleClasses(path.join(projectRoot, "tsconfig.json"))
+
 		assert.deepEqual(result.errors, [])
 		assert.deepEqual(result.diagnostics.map(diagnostic => diagnostic.className), ["unusedClass"])
 		assert.equal(result.diagnostics[0]?.filePath, path.join(projectRoot, "src/Main.module.scss"))
@@ -108,6 +112,7 @@ void test("finds unused classes while aggregating supported usage across a rootD
 
 void test("reports missing declarations with actionable guidance", () => {
 	const { projectRoot, root } = createFixture()
+
 	try {
 		writeFile(path.join(projectRoot, "src/Missing.module.scss"), ".button { color: red; }\n")
 		writeFile(
@@ -116,6 +121,7 @@ void test("reports missing declarations with actionable guidance", () => {
 		)
 
 		const result = findUnusedScssModuleClasses(path.join(projectRoot, "tsconfig.json"))
+
 		assert.deepEqual(result.diagnostics, [])
 		assert.equal(result.errors.length, 1)
 		assert.match(result.errors[0]?.message ?? "", /Generate and validate CSS Module typings/)
@@ -133,6 +139,7 @@ void test("CLI returns success, unused-class failure, and project-load error exi
 		error: (message: string) => messages.push(message),
 		log: (message: string) => messages.push(message),
 	}
+
 	try {
 		writeModule(projectRoot, "Success", ["used"])
 		writeFile(

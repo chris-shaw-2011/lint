@@ -28,6 +28,7 @@ void test("proto-style rejects trailing whitespace, CRLF, and a missing final ne
 		"trailing.proto",
 		`message Example {\n\tstring value = 1;\t\n}\n`,
 	)
+
 	assert.deepEqual(
 		trailingWhitespaceIssues.map(issue => issue.rule),
 		["trailing-whitespace"],
@@ -37,6 +38,7 @@ void test("proto-style rejects trailing whitespace, CRLF, and a missing final ne
 		"line-ending.proto",
 		"message Example {\r\n\tstring value = 1;\r\n}\r\n",
 	)
+
 	assert.equal(
 		lineEndingIssues.filter(issue => issue.rule === "line-ending").length,
 		3,
@@ -46,6 +48,7 @@ void test("proto-style rejects trailing whitespace, CRLF, and a missing final ne
 		"final-newline.proto",
 		`syntax = "proto3";`,
 	)
+
 	assert.deepEqual(
 		finalNewlineIssues.map(issue => issue.rule),
 		["final-newline"],

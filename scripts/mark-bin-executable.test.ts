@@ -13,6 +13,7 @@ void test("markBinExecutable makes known bin files executable without touching m
 
 		for (const fileName of existingFiles) {
 			const filePath = path.join(tempDir, fileName)
+
 			writeFileSync(filePath, "#!/usr/bin/env node\n")
 			chmodSync(filePath, 0o644)
 		}
@@ -22,10 +23,12 @@ void test("markBinExecutable makes known bin files executable without touching m
 		for (const fileName of existingFiles) {
 			const filePath = path.join(tempDir, fileName)
 			const mode = statSync(filePath).mode & 0o777
+
 			assert.equal(mode, 0o755)
 		}
 
 		const missingFilePath = path.join(tempDir, binFiles[2])
+
 		assert.doesNotThrow(() => markBinExecutable(tempDir, [path.basename(missingFilePath)]))
 	}
 	finally {

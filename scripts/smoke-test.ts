@@ -43,9 +43,11 @@ try {
 		},
 	})
 	const tarballName = readdirSync(tempRoot).find(file => file.endsWith(".tgz"))
+
 	if (!tarballName) {
 		throw new Error("Unable to find packed tarball.")
 	}
+
 	const tarballPath = path.join(tempRoot, tarballName)
 
 	writeJson(path.join(fixtureRoot, "package.json"), {
@@ -200,26 +202,34 @@ try {
 	)
 	const eslintBinPath = path.join(fixtureRoot, "node_modules/.bin/eslint")
 	const eslintBinMode = statSync(eslintBinPath).mode & 0o111
+
 	if (eslintBinMode === 0) {
 		throw new Error(`Installed eslint shim is not executable: ${eslintBinPath}`)
 	}
+
 	const bufBinPath = path.join(fixtureRoot, "node_modules/.bin/buf")
 	const bufBinMode = statSync(bufBinPath).mode & 0o111
+
 	if (bufBinMode === 0) {
 		throw new Error(`Installed buf shim is not executable: ${bufBinPath}`)
 	}
+
 	const protoStyleBinPath = path.join(fixtureRoot, "node_modules/.bin/proto-style")
 	const protoStyleBinMode = statSync(protoStyleBinPath).mode & 0o111
+
 	if (protoStyleBinMode === 0) {
 		throw new Error(`Installed proto-style shim is not executable: ${protoStyleBinPath}`)
 	}
+
 	run("npm", ["run", "lint:proto"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:root"], { cwd: fixtureRoot, env: npmEnv })
 	run("npm", ["run", "lint:scss"], { cwd: fixtureRoot, env: npmEnv })
 	const scssModulesUnusedBinPath = path.join(fixtureRoot, "node_modules/.bin/scss-modules-unused")
+
 	if ((statSync(scssModulesUnusedBinPath).mode & 0o111) === 0) {
 		throw new Error(`Installed scss-modules-unused shim is not executable: ${scssModulesUnusedBinPath}`)
 	}
+
 	run("npm", ["exec", "--", "scss-modules-unused", "--project", "tsconfig.json"], {
 		cwd: fixtureRoot,
 		env: npmEnv,

@@ -61,6 +61,35 @@ The React config assumes typed React code. It does not retain legacy validation 
 
 Add extra config objects only when you need local overrides (for example custom rules, globals, or ignores).
 
+### Control flow formatting
+
+All shared ESLint configs require braces around conditionals and loop bodies, with nonempty
+block bodies on separate lines. Blank lines are required before and after `if`, `for`, `while`,
+`do`, `switch`, and `try` statements, and before `return` statements when another statement
+precedes them in the same block. A blank line is also required after a group of variable
+declarations. Consecutive declarations can stay together or be separated into groups.
+
+These rules support `eslint --fix` through [`curly`](https://eslint.org/docs/latest/rules/curly),
+[`@stylistic/brace-style`](https://eslint.style/rules/brace-style), and
+[`@stylistic/padding-line-between-statements`](https://eslint.style/rules/padding-line-between-statements).
+The existing Stroustrup placement of `else`, `catch`, and `finally` is preserved.
+
+Declaration ordering and combining destructuring statements remain manual refactors. Keep
+object validation before destructuring or accessing properties so invalid inputs still receive
+the intended validation error.
+
+### Type assertions and JSON validation
+
+The shared TypeScript configs enable `@typescript-eslint/no-unsafe-type-assertion` to reject
+assertions that narrow unchecked values, such as `json as LibationBook`. Validate unknown input
+with runtime type guards or a schema parser such as Zod, and use the validated result. Zod is
+optional and should be installed in the consuming project if needed.
+
+When using `JSON.parse`, receive its result as `unknown` before validating it to avoid passing
+its `any` type through the application. This rule does not require a particular validation
+library or the use of an inline throwing helper. Like other type-aware rules, it is disabled
+for the existing config-file exceptions.
+
 ## Protobuf Usage
 
 The included `buf` command uses the package's pinned Buf CLI dependency. Configure each consuming

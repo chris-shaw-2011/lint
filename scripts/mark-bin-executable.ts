@@ -7,9 +7,11 @@ export const binFiles = ["buf.js", "eslint.js", "knip.js", "proto-style.js", "ru
 export function markBinExecutable(distBinDir: string, fileNames: readonly string[] = binFiles): void {
 	for (const fileName of fileNames) {
 		const filePath = path.join(distBinDir, fileName)
+
 		if (!existsSync(filePath)) {
 			continue
 		}
+
 		chmodSync(filePath, 0o755)
 	}
 }
@@ -19,5 +21,6 @@ const scriptPath = fileURLToPath(import.meta.url)
 if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
 	const scriptsDir = path.dirname(scriptPath)
 	const distBinDir = path.resolve(scriptsDir, "../dist/bin")
+
 	markBinExecutable(distBinDir)
 }

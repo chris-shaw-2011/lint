@@ -1,13 +1,10 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import test from "node:test"
 import eslintReact from "@eslint-react/eslint-plugin"
-import type { Linter } from "eslint"
-
-interface PackageJson {
-	dependencies?: Record<string, string>,
-	exports?: Record<string, unknown>,
-}
+import { ESLint } from "eslint"
+import packageJson from "../package.json" with { type: "json" }
 
 const typeInferencePluginName = "type-inference"
 const typeInferenceRuleName = "type-inference/no-inferrable-return-type"
@@ -17,6 +14,7 @@ function assertNoTypeInferenceReferences(value: unknown, seen = new WeakSet<obje
 		assert.notEqual(value, "eslint-plugin-type-inference")
 		assert.notEqual(value, typeInferencePluginName)
 		assert.equal(value.startsWith(`${typeInferencePluginName}/`), false)
+
 		return
 	}
 
@@ -45,14 +43,19 @@ void test("normal config adds the type-inference integration to the shared confi
 		assert.strictEqual(normal[index], config, `shared config entry ${index} should remain unchanged`)
 	}
 
-	const integration = normal.at(-1) as Linter.Config
+	const integration = normal.at(-1)
+
+	assert.ok(integration)
 	assert.deepEqual(integration.files, ["**/*.{ts,tsx,mts,cts}"])
 	assert.deepEqual(integration.ignores, [
 		"**/eslint.config.{js,mjs,cjs,ts,mts,cts}",
 		"**/*.config.{js,mjs,cjs,ts,mts,cts}",
 		"**/playwright*.{js,mjs,cjs,ts,mts,cts}",
 	])
-	assert.ok(integration.plugins?.[typeInferencePluginName])
+	assert.strictEqual(
+		integration.plugins?.[typeInferencePluginName],
+		(await import("eslint-plugin-type-inference")).default,
+	)
 	assert.equal(integration.rules?.[typeInferenceRuleName], "error")
 })
 
@@ -62,16 +65,13 @@ void test("without-type-inference contains no type-inference integration", async
 	assertNoTypeInferenceReferences(config)
 
 	const source = readFileSync(new URL("../src/without-type-inference.ts", import.meta.url), "utf8")
+
 	assert.equal(source.includes("eslint-plugin-type-inference"), false)
 	assert.equal(source.includes("type-inference/"), false)
 })
 
 void test("package declares the without-type-inference export", () => {
-	const packageJson = JSON.parse(
-		readFileSync(new URL("../package.json", import.meta.url), "utf8"),
-	) as PackageJson
-
-	assert.deepEqual(packageJson.exports?.["./without-type-inference"], {
+	assert.deepEqual(packageJson.exports["./without-type-inference"], {
 		types: "./dist/without-type-inference.d.ts",
 		default: "./dist/without-type-inference.js",
 	})
@@ -81,8 +81,11 @@ void test("React config enables strict type-checked rules and curated additions"
 	const reactConfig = (await import("../src/react.ts")).default
 	const hooksPreset = reactConfig.find(config => config.plugins?.["react-hooks"])
 	const refreshPreset = reactConfig.find(config => config.plugins?.["react-refresh"])
-	const preset = reactConfig.at(-2) as Linter.Config
-	const integration = reactConfig.at(-1) as Linter.Config
+	const preset = reactConfig.at(-2)
+	const integration = reactConfig.at(-1)
+
+	assert.ok(preset)
+	assert.ok(integration)
 
 	assert.equal(hooksPreset?.rules?.["react-hooks/rules-of-hooks"], "error")
 	assert.deepEqual(refreshPreset?.rules?.["react-refresh/only-export-components"], ["error", {}])
@@ -91,8 +94,10 @@ void test("React config enables strict type-checked rules and curated additions"
 	assert.deepEqual(preset.rules, eslintReact.configs["strict-type-checked"].rules)
 	assert.strictEqual(preset.plugins?.["@eslint-react"], eslintReact)
 	assert.deepEqual(integration.files, ["src/**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}"])
-	const configuredGlobals = integration.languageOptions?.globals as Record<string, boolean> | undefined
-	assert.ok(configuredGlobals)
+	const configuredGlobals = integration.languageOptions?.globals
+
+	assert.ok(typeof configuredGlobals === "object" && configuredGlobals !== null)
+	assert.ok("window" in configuredGlobals && "self" in configuredGlobals)
 	assert.equal(configuredGlobals.window, false)
 	assert.equal(configuredGlobals.self, false)
 
@@ -126,10 +131,44 @@ void test("React config enables strict type-checked rules and curated additions"
 })
 
 void test("package uses ESLint React instead of the patched legacy plugin", () => {
-	const packageJson = JSON.parse(
-		readFileSync(new URL("../package.json", import.meta.url), "utf8"),
-	) as PackageJson
+	assert.match(packageJson.dependencies["@eslint-react/eslint-plugin"], /^\^/v)
+	assert.equal("eslint-plugin-react" in packageJson.dependencies, false)
+})
 
-	assert.match(packageJson.dependencies?.["@eslint-react/eslint-plugin"] ?? "", /^\^/v)
-	assert.equal(packageJson.dependencies?.["eslint-plugin-react"], undefined)
+void test("all shared configs reject unsafe narrowing assertions and accept validated JSON", async () => {
+	const configs = [
+		(await import("../src/index.ts")).default,
+		(await import("../src/without-type-inference.ts")).default,
+		(await import("../src/react.ts")).default,
+	]
+	const filePath = fileURLToPath(import.meta.url)
+
+	for (const overrideConfig of configs) {
+		const eslint = new ESLint({ overrideConfigFile: true, overrideConfig })
+		const [unsafe] = await eslint.lintText(`export function readTitle(value: unknown) {
+	const book = value as { Title: string }
+
+	return book.Title
+}
+`, { filePath })
+
+		assert.ok(unsafe)
+		assert.deepEqual(unsafe.messages.map(message => message.ruleId), [
+			"@typescript-eslint/no-unsafe-type-assertion",
+		])
+
+		const [safe] = await eslint.lintText(`export function parseTitle(text: string) {
+	const value: unknown = JSON.parse(text)
+
+	if (typeof value !== "object" || value === null || !("Title" in value) || typeof value.Title !== "string") {
+		throw new Error("Expected a book with a title")
+	}
+
+	return value.Title
+}
+`, { filePath })
+
+		assert.ok(safe)
+		assert.deepEqual(safe.messages, [])
+	}
 })
